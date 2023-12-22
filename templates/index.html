@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent or Buy Conundrum</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+        }
+
+        #header {
+            background-color: #3498db;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 28px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        #gif-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #content {
+            display: flex;
+            width: 80%;
+            justify-content: space-between;
+        }
+
+        #sliders-container {
+            width: 30%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+    
+
+        .slider-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .slider {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .slider-value {
+            text-align: center;
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        #output-container {
+            width: 60%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #00CED1;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            color: #fff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+       #output-text {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        #output-line1,
+        #output-line2,
+        #output-line3 {
+            margin-bottom: 5px;
+        }
+
+        #rentThreshold {
+            font-size: 60px;
+            font-weight: bold;
+        }
+
+        #assumptions-container {
+            width: 80%;
+            margin-top: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #assumptions {
+            color: #333;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">Rent or Buy Conundrum</div>
+
+    <div id="content">
+        <div id="sliders-container">
+            <label for="slider1" class="slider-label">Home Price:</label>
+            <input type="range" id="home-price" class="slider" min="500000" max="3000000" value="1500000" step="50000" oninput="updateOutput()">
+            <div class="slider-value" id="slider1Value">$1500000</div>
+
+            <label for="slider2" class="slider-label">Mortgage Rate:</label>
+            <input type="range" id="interest-rate" class="slider" min="0" max="10" value="5" step="0.5" oninput="updateOutput()">
+            <div class="slider-value" id="slider2Value">5%</div>
+
+            <label for="slider3" class="slider-label">Tenure: How long will you stay?</label>
+            <input type="range" id="tenure" class="slider" min="2" max="16" value="10" step="2" oninput="updateOutput()">
+            <div class="slider-value" id="slider3Value">10 years</div>
+        </div>
+        <div id="output-container">
+            <div id="output-line1">Renting is better than buying if you could rent for....</div>
+            <div id="output-text">$<span id="rentThreshold">5400</span></div>
+            <div id="output-line3">or cheaper.</div>
+        </div>
+      </div>
+
+    <div id="assumptions-container">
+        <div id="assumptions">
+            <strong>Assumptions:</strong><br>
+            1. Down Payment: 20%<br>
+            2. Buying Cost: 2%<br>
+            3. Selling Cost: 5%<br>
+            4. Property Taxes: 1.25% per year<br>
+            5. Home Insurance: 0.5% per year<br>
+            6. Home Maintenance: 0.5% per year<br>
+            7. Inflation: 3% per year<br>
+            8. House Price Appreciation: 5% per year<br>
+            9. Opportunity cost of investment: 8% per year<br>
+           10. Opportunity cost of investment: 8% per year<br>
+           11. Rent Inflation: 3% per year<br>
+           12. Rental Deposit & Broker fee: 2 months rent<br>
+           13. Rental Insurance: 1.3% per year<br>
+
+
+
+        </div>
+<div id="image-container">
+        <img src="static/house.gif" alt="home" style="max-width: 100%; height: auto;">
+    </div>
+    </div>
+
+
+    <script>
+
+        
+
+        function updateOutput() {
+            var slider1Value = document.getElementById("home-price").value;
+            var slider2Value = document.getElementById("interest-rate").value;
+            var slider3Value = document.getElementById("tenure").value;
+
+            document.getElementById("slider1Value").innerHTML = "$" + slider1Value;
+            document.getElementById("slider2Value").innerHTML =  slider2Value + "%";
+            document.getElementById("slider3Value").innerHTML = slider3Value + " years";
+           
+
+// Send the slider values to the server and update the output
+            fetch('/calculate_breakeven', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    houseprice: slider1Value,
+                    interestrate: slider2Value,
+                    tenure: slider3Value,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                var totalValue = data.total_value;
+                document.getElementById("rentThreshold").innerHTML = totalValue;
+            });
+
+
+        }
+    </script>
+
+</body>
+</html>
